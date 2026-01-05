@@ -1,0 +1,13 @@
+Hatchback
+Sedan
+SUV
+MUV
+Bus
+Truck
+Three-wheeler
+Two-wheeler
+LCV (Merged)
+Mini-bus (Merged)
+Tempo-traveller
+Bicycle
+Van

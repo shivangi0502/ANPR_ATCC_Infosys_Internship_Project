@@ -7,7 +7,7 @@ from traffic_engine import TrafficLightManager
 import os
 
 # --- CONFIGURATION ---
-MODEL_PATH = r"C:\Users\ADMIN\Documents\Dev_Projects\Traffic_Infosys\UVH_Traffic_Project\yolov9e_a6000_run\weights\best.pt"
+MODEL_PATH = r"C:\Users\ADMIN\Documents\Dev_Projects\Traffic_Infosys\new_finetunning\FineTune_Project\scooter_fix_v1\weights\best.pt"
 
 st.set_page_config(page_title="AI Traffic Manager", layout="wide")
 st.title("🚦 AI Smart Traffic Light Control System")
@@ -58,10 +58,10 @@ if uploaded_file is not None:
         alert_placeholder = st.empty()
         chart_placeholder = st.empty()
     
-    # --- NEW SECTION: Bottom Stats ---
+    # --- SECTION: Bottom Stats ---
     st.markdown("---")
     st.subheader("⏱️ Lane Wait Time Analytics")
-    # We create 4 columns for the main directions at the bottom
+    #  4 columns for the main directions at the bottom
     stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
     stat_placeholders = {
         'UP': stat_col1.empty(),
@@ -87,7 +87,6 @@ if uploaded_file is not None:
             frame_count += 1
             frame = cv2.resize(frame, (1280, 720))
             
-            # Unpack the 6th return value: 'wait_times'
             processed_frame, lane_data, active_lane, green_time, congestion_msg, wait_times = traffic_system.process_frame(frame)
             
             # 1. Alert
