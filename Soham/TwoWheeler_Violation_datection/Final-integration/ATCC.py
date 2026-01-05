@@ -190,7 +190,7 @@ if uploaded_file is not None:
                             if i + j < len(debug_list):
                                 d_cols[j].image(debug_list[i+j], caption="Debug Crop", use_container_width=True)
 
-        # --- FINAL REPORT (No Balloons) ---
+        # --- FINAL REPORT---
         st.markdown("---")
         st.header("Final Session Report")
         
