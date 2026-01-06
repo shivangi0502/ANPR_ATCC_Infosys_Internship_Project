@@ -47,7 +47,6 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("AI Sensitivity Settings")
     
-    # --- NEW: DETAILED CONFIDENCE SLIDERS ---
     st.write("**Traffic Detection**")
     conf_traffic = st.slider("Vehicle Detection", 0.1, 1.0, 0.35)
     
@@ -99,6 +98,7 @@ if uploaded_file is not None:
     st.markdown("---")
     video_placeholder = st.empty()
 
+    # --- UPDATED TABS ---
     tab_traffic, tab_viol, tab_debug = st.tabs(["📊 Traffic Analytics", "📸 Violation Evidence & OCR", "🛠️ System Diagnostics"])
     
     with tab_traffic:
@@ -106,7 +106,14 @@ if uploaded_file is not None:
         with t_col1:
             st.write("**Lane Wait Times**")
             wait_placeholders = {'UP': st.empty(), 'DOWN': st.empty(), 'LEFT': st.empty(), 'RIGHT': st.empty()}
-        with t_col2: chart_placeholder = st.empty()
+        
+        # --- NEW: SPLIT GRAPHS INTO SUB-TABS ---
+        with t_col2: 
+            subtab_density, subtab_class = st.tabs(["Lane Density", "Vehicle Classes"])
+            with subtab_density:
+                density_chart_placeholder = st.empty()
+            with subtab_class:
+                class_chart_placeholder = st.empty()
 
     with tab_viol:
         evidence_header = st.empty()
@@ -125,7 +132,6 @@ if uploaded_file is not None:
         traffic_system.violation_engine.helmet_conf = conf_helmet
         traffic_system.violation_engine.mobile_conf = conf_mobile
         traffic_system.violation_engine.rider_conf = conf_triple
-        # ---------------------------------------
 
         frame_count = 0
         while cap.isOpened():
@@ -159,18 +165,32 @@ if uploaded_file is not None:
             frame_rgb = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             video_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
             
-            # Charts & Evidence (Same Logic)
+            # --- UPDATE GRAPHS ---
+            
+            # 1. Lane Density Graph
             active_lanes_data = {k: v for k, v in lane_data.items() if v > 0}
             if active_lanes_data:
                 df = pd.DataFrame({'Direction': list(active_lanes_data.keys()), 'Density': list(active_lanes_data.values())})
                 fig = px.bar(df, x='Direction', y='Density', color='Direction', height=300)
                 fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-                chart_placeholder.plotly_chart(fig, use_container_width=True, key=f"chart_{frame_count}")
+                density_chart_placeholder.plotly_chart(fig, use_container_width=True, key=f"density_{frame_count}")
             
+            # 2. NEW: Vehicle Class Graph
+            unique_classes = traffic_system.unique_vehicle_classes
+            if unique_classes:
+                counts = Counter(unique_classes.values())
+                df_class = pd.DataFrame({'Vehicle Type': list(counts.keys()), 'Count': list(counts.values())})
+                # Horizontal bar chart is easier to read for many classes
+                fig_class = px.bar(df_class, x='Count', y='Vehicle Type', orientation='h', color='Vehicle Type', title="Live Class Distribution")
+                fig_class.update_layout(margin=dict(l=0, r=0, t=30, b=0), height=300)
+                class_chart_placeholder.plotly_chart(fig_class, use_container_width=True, key=f"class_{frame_count}")
+            
+            # Update Wait Times
             for direction, ph in wait_placeholders.items():
                 sec = wait_times.get(direction, 0.0)
                 ph.metric(direction, f"{sec:.1f}s", delta="Stopped" if sec > 0 else "Moving", delta_color="inverse" if sec > 5 else "normal")
 
+            # Update Evidence
             if recent_violations:
                 evidence_header.write(f"**Latest Evidence (Total: {len(recent_violations)})**")
                 with evidence_gallery.container():
@@ -181,6 +201,7 @@ if uploaded_file is not None:
                         cols[i].image(item['image'], caption=caption, use_container_width=True)
             else: evidence_header.info("No violations detected yet.")
 
+            # Update Debug
             if debug_crops:
                 with debug_gallery.container():
                     debug_list = list(debug_crops)
