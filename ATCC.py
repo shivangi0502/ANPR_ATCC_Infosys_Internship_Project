@@ -14,7 +14,7 @@ VIOLATION_MODEL_PATH = "model2/best2.pt"
 st.set_page_config(
     page_title="AI Traffic Command Center", 
     layout="wide", 
-    page_icon="🚦",
+    
     initial_sidebar_state="expanded"
 )
 
@@ -27,7 +27,7 @@ st.markdown("""
 
 # --- SIDEBAR CONTROLS ---
 with st.sidebar:
-    st.title("🎛️ Control Panel")
+    st.title("Control Panel")
     
     st.subheader("System Status")
     status_indicator = st.empty()
@@ -71,7 +71,7 @@ except Exception as e:
     st.error(f"System Error: {e}")
     st.stop()
 
-uploaded_file = st.file_uploader("📂 Upload CCTV Footage (MP4/AVI)", type=['mp4', 'avi', 'mov'])
+uploaded_file = st.file_uploader("Upload CCTV Footage (MP4/AVI)", type=['mp4', 'avi', 'mov'])
 
 if uploaded_file is not None:
     tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') 
@@ -80,26 +80,26 @@ if uploaded_file is not None:
     cap = cv2.VideoCapture(tfile.name)
     
     # HUD
-    st.subheader("📢 Live Network Status")
+    st.subheader("Live Network Status")
     col_sig, col_veh, col_viol, col_alert = st.columns(4)
     with col_sig:
-        st.markdown("**🚥 Signal Status**")
+        st.markdown("**Signal Status**")
         signal_metric = st.empty()
     with col_veh:
-        st.markdown("**🚗 Total Vehicles**")
+        st.markdown("**Total Vehicles**")
         vehicle_metric = st.empty()
     with col_viol:
-        st.markdown("**👮 Total Violations**")
+        st.markdown("**Total Violations**")
         violation_metric = st.empty()
     with col_alert:
-        st.markdown("**⚠️ Alerts**")
+        st.markdown("**Alerts**")
         alert_metric = st.empty()
 
     st.markdown("---")
     video_placeholder = st.empty()
 
     # --- UPDATED TABS ---
-    tab_traffic, tab_viol, tab_debug = st.tabs(["📊 Traffic Analytics", "📸 Violation Evidence & OCR", "🛠️ System Diagnostics"])
+    tab_traffic, tab_viol, tab_debug = st.tabs(["Traffic Analytics", "Violation Evidence & OCR", "System Diagnostics"])
     
     with tab_traffic:
         t_col1, t_col2 = st.columns([1, 2])
@@ -159,8 +159,8 @@ if uploaded_file is not None:
             v_color = "normal" if viol_stats["Total Violations"] == 0 else "inverse"
             violation_metric.metric("Count", viol_stats["Total Violations"], delta_color=v_color, label_visibility="collapsed")
             
-            if congestion_msg: alert_metric.error(congestion_msg, icon="🚨")
-            else: alert_metric.success("Traffic Flow: Normal", icon="✅")
+            if congestion_msg: alert_metric.error(congestion_msg)
+            else: alert_metric.success("Traffic Flow: Normal")
 
             frame_rgb = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             video_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
