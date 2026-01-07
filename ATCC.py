@@ -11,14 +11,14 @@ from collections import Counter
 TRAFFIC_MODEL_PATH = "model1/best.pt"
 VIOLATION_MODEL_PATH = "model2/best2.pt" 
 
-st.set_page_config(page_title="AI Traffic Command Center", layout="wide", page_icon="🚦")
+st.set_page_config(page_title="AI Traffic Command Center", layout="wide")
 
 # --- SIDEBAR CONTROLS ---
 with st.sidebar:
-    st.title("🎛️ Control Panel")
+    st.title("Control Panel")
     
     # --- MODE SELECTION ---
-    st.markdown("### 🛠️ Select Functionality")
+    st.markdown("### Select Functionality")
     system_mode = st.radio(
         "Choose Operation Mode:",
         ("Traffic Analysis", "Traffic Violation Detection"),
@@ -41,7 +41,7 @@ with st.sidebar:
 
     # Settings
     st.markdown("---")
-    st.subheader("⚙️ Settings")
+    st.subheader("Settings")
     
     if system_mode == "Traffic Analysis":
         conf_traffic = st.slider("Vehicle Detection Confidence", 0.1, 1.0, 0.35)
@@ -56,9 +56,9 @@ def load_engine():
 
 traffic_system = load_engine()
 
-st.title(f"🚦 {system_mode} Dashboard")
+st.title(f"{system_mode} Dashboard")
 
-uploaded_file = st.file_uploader("📂 Upload CCTV Footage", type=['mp4', 'avi'])
+uploaded_file = st.file_uploader(" Upload CCTV Footage", type=['mp4', 'avi'])
 
 if uploaded_file is not None:
     tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') 
@@ -70,13 +70,13 @@ if uploaded_file is not None:
         # Metric Row
         col_sig, col_veh, col_alert = st.columns(3)
         with col_sig: 
-            st.markdown("**🚥 Signal Status**")
+            st.markdown("**Signal Status**")
             signal_metric = st.empty()
         with col_veh: 
-            st.markdown("**🚗 Cumulative Density**")
+            st.markdown("**Cumulative Density**")
             vehicle_metric = st.empty()
         with col_alert: 
-            st.markdown("**⚠️ Status**")
+            st.markdown("**Status**")
             alert_metric = st.empty()
         
         # Main Layout: Video on Left, Graphs on Right
@@ -84,7 +84,7 @@ if uploaded_file is not None:
         with col_video:
             video_placeholder = st.empty()
         with col_graphs:
-            st.subheader("📊 Live Analytics")
+            st.subheader("Live Analytics")
             tab1, tab2 = st.tabs(["Vehicle Class Distribution", "Lane Density"])
             with tab1:
                 class_chart_placeholder = st.empty()
@@ -95,17 +95,17 @@ if uploaded_file is not None:
         # Violation Layout
         col_tot, col_hel, col_mob = st.columns(3)
         with col_tot: 
-            st.markdown("**👮 Total Violations**")
+            st.markdown("**Total Violations**")
             viol_metric = st.empty()
         with col_hel: 
-            st.markdown("**⛑️ No Helmet**")
+            st.markdown("**No Helmet**")
             helmet_metric = st.empty()
         with col_mob: 
-            st.markdown("**📱 Mobile Usage**")
+            st.markdown("**Mobile Usage**")
             mobile_metric = st.empty()
             
         video_placeholder = st.empty()
-        st.subheader("📸 Live Violation Evidence")
+        st.subheader("Live Violation Evidence")
         evidence_gallery = st.empty()
 
     # --- MAIN LOOP ---
@@ -139,7 +139,6 @@ if uploaded_file is not None:
             
             # --- UPDATE GRAPHS & METRICS ---
             if system_mode == "Traffic Analysis":
-                # 1. Update Metrics
                 colors = {k: '🔴' for k in lane_data.keys()}
                 if active_lane in colors: colors[active_lane] = '🟢'
                 signal_metric.markdown(f"<h2>{colors.get(active_lane,'🟢')} {active_lane} : {int(green_time)}s</h2>", unsafe_allow_html=True)
@@ -148,17 +147,14 @@ if uploaded_file is not None:
                 if congestion: alert_metric.error(congestion)
                 else: alert_metric.success("Flow Normal")
                 
-                # 2. Update Lane Density Graph (Tab 2)
                 if lane_data:
                     df_lane = pd.DataFrame({'Lane': list(lane_data.keys()), 'Density': list(lane_data.values())})
                     fig_lane = px.bar(df_lane, x='Lane', y='Density', color='Lane', title="Current Lane Load")
                     lane_chart_placeholder.plotly_chart(fig_lane, use_container_width=True, key=f"lane_{frame_count}")
 
-                # 3. Update Vehicle Class Graph (Tab 1 - NEW!)
                 # We fetch the live dictionary of unique vehicles from the engine
                 unique_classes = traffic_system.unique_vehicle_classes
                 if unique_classes:
-                    # Count occurrences (e.g., {'Car': 10, 'Bike': 5})
                     counts = Counter(unique_classes.values())
                     df_class = pd.DataFrame({'Vehicle Type': list(counts.keys()), 'Count': list(counts.values())})
                     
